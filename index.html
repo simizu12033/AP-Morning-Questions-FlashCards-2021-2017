@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AP午前 重要用語リコール</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">応用情報 午前8回分</p>
+        <h1>説明から重要用語を答える</h1>
+      </div>
+      <div class="score">
+        <span id="progressText">0 / 0</span>
+        <strong id="accuracyText">正答率 -</strong>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="sidebar" aria-label="学習条件">
+        <label class="field">
+          <span>検索</span>
+          <input id="searchInput" type="search" placeholder="ARP、監査、令和3年など">
+        </label>
+
+        <label class="field">
+          <span>年度</span>
+          <select id="examFilter"></select>
+        </label>
+
+        <label class="field">
+          <span>分野</span>
+          <select id="categoryFilter"></select>
+        </label>
+
+        <label class="field">
+          <span>モード</span>
+          <select id="modeFilter">
+            <option value="all">全部</option>
+            <option value="unseen">未回答</option>
+            <option value="missed">苦手だけ</option>
+            <option value="starred">星付き</option>
+          </select>
+        </label>
+
+        <div class="actions">
+          <button id="shuffleBtn" type="button">シャッフル</button>
+          <button id="resetBtn" type="button">履歴リセット</button>
+        </div>
+
+        <div class="miniStats">
+          <div><span>カード</span><strong id="countText">0</strong></div>
+          <div><span>苦手</span><strong id="missedText">0</strong></div>
+          <div><span>星付き</span><strong id="starredText">0</strong></div>
+        </div>
+      </aside>
+
+      <section class="trainer" aria-live="polite">
+        <div class="cardMeta">
+          <span id="examText"></span>
+          <span id="fieldText"></span>
+          <a id="sourceLink" target="_blank" rel="noreferrer">出典</a>
+        </div>
+
+        <article class="recallCard">
+          <div class="prompt">
+            <p class="label">まずこれだけ</p>
+            <h2 id="cueText"></h2>
+            <p id="questionText"></p>
+          </div>
+
+          <div class="visual" id="visualAid" aria-label="記憶補助図"></div>
+
+          <form class="answer" id="answerForm">
+            <label for="answerInput">この説明の用語は？</label>
+            <div class="answerRow">
+              <input id="answerInput" autocomplete="off" placeholder="用語を入力">
+              <button type="submit">判定</button>
+            </div>
+          </form>
+
+          <div class="result" id="resultBox" hidden></div>
+
+          <details class="details">
+            <summary>詳しい説明</summary>
+            <p id="explanationText"></p>
+            <div id="wrongHintBox"></div>
+          </details>
+        </article>
+
+        <div class="navActions">
+          <button id="prevBtn" type="button">前へ</button>
+          <button id="starBtn" type="button" aria-pressed="false">星を付ける</button>
+          <button id="showBtn" type="button">答えを見る</button>
+          <button id="nextBtn" type="button">次へ</button>
+        </div>
+      </section>
+    </main>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
