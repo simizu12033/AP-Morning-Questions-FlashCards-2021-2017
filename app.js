@@ -306,14 +306,27 @@ function mnemonicHint(card, text) {
   if (mnemonicHints[card.term]) return mnemonicHints[card.term];
   const expansion = (card.aliases || []).find((alias) => /[A-Za-z]/.test(alias) && normalizeAlias(alias) !== normalizeAlias(card.term));
   if (expansion && !String(card.term).includes(expansion)) return shortPhrase(expansion, 24);
-  const combined = `${card.term} ${card.field} ${card.topic} ${text}`;
+  const combined = `${card.term} ${card.field} ${card.topic} ${card.category}`;
   if (/認証|証明|鍵|署名|暗号/.test(combined)) return "本人性・改ざん有無を見る";
   if (/攻撃|脆弱|不正|マルウェア/.test(combined)) return "攻撃の入口で見分ける";
   if (/DB|データ|表|トランザクション/.test(combined)) return "データの持ち方で見分ける";
   if (/ネットワーク|通信|LAN|IP|MAC/.test(combined)) return "通信のどこを扱うか";
   if (/プロジェクト|サービス|監査|運用/.test(combined)) return "管理の場面で見分ける";
   if (/経営|マーケティング|会計|顧客/.test(combined)) return "経営判断の軸で見る";
-  return shortPhrase(card.topic || card.field || text, 18);
+  return fieldHint(card);
+}
+
+function fieldHint(card) {
+  const field = `${card.field} ${card.category} ${card.topic}`;
+  if (/アルゴリズム|データ構造/.test(field)) return "処理手順の形で見る";
+  if (/ハードウェア|プロセッサ|メモリ|入出力|計測|制御/.test(field)) return "装置の役割で見分ける";
+  if (/データベース|データ操作|トランザクション/.test(field)) return "データの持ち方で見る";
+  if (/ネットワーク|通信/.test(field)) return "通信の層で見分ける";
+  if (/セキュリティ/.test(field)) return "攻撃か防御かで見る";
+  if (/開発|設計|テスト|保守|要件/.test(field)) return "開発工程の役割で見る";
+  if (/サービス|プロジェクト|監査|運用/.test(field)) return "管理場面で見分ける";
+  if (/経営|マーケティング|調達|会計|財務|知的財産/.test(field)) return "ビジネス上の役割で見る";
+  return "選択肢の役割で見分ける";
 }
 
 function shortPhrase(value, limit = 22) {
@@ -2041,15 +2054,15 @@ function clueLabel(card, family) {
   if (family === "data") return "データの仕組み";
   if (family === "system") return "動かす仕組み";
   if (family === "trust") return "信用の確認";
-  if (family === "security") return "守る仕組み";
+  if (family === "security") return "攻撃か防御か";
   return {
     strategy: "選択肢の軸",
     cycle: "流れの中心",
-    data: "データの特徴",
-    system: "仕組みの特徴",
+    data: "データの持ち方",
+    system: "装置や通信の役割",
     trust: "確認の要点",
-    security: "守り方・攻撃型",
-    mechanism: "見分ける特徴",
+    security: "攻撃か防御か",
+    mechanism: "役割で見分ける",
   }[family] || "見分ける特徴";
 }
 
