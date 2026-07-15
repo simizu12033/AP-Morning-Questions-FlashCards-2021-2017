@@ -162,8 +162,10 @@ select, input {
 }
 
 .card-shell {
-  min-height: 620px;
+  min-height: 560px;
   padding: clamp(18px, 3vw, 30px);
+  display: flex;
+  flex-direction: column;
 }
 
 .card-meta {
@@ -186,14 +188,14 @@ select, input {
 }
 
 .diagram {
-  min-height: 210px;
+  height: 132px;
   display: grid;
   place-items: center;
-  margin-bottom: 22px;
+  margin-bottom: 18px;
   border: 1px solid #d8e3ed;
   border-radius: 8px;
   background: linear-gradient(135deg, #f8fcff, #eef5f2);
-  overflow: visible;
+  overflow: hidden;
 }
 
 .diagram-stage {
@@ -206,11 +208,11 @@ select, input {
 
 .quiz-cue {
   width: min(92%, 620px);
-  min-height: 170px;
+  min-height: 0;
   display: grid;
   align-content: center;
-  gap: 12px;
-  padding: 22px;
+  gap: 8px;
+  padding: 16px;
   border: 1px solid #cad8e5;
   border-left: 6px solid var(--accent-2);
   border-radius: 8px;
@@ -231,16 +233,16 @@ select, input {
 
 .quiz-cue strong {
   color: #12202d;
-  font-size: clamp(24px, 4vw, 38px);
+  font-size: clamp(22px, 3.2vw, 32px);
   line-height: 1.18;
 }
 
 .quiz-cue p {
   margin: 0;
   color: #4a5b70;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 900;
-  line-height: 1.65;
+  line-height: 1.55;
 }
 
 .curated-cue {
@@ -1614,7 +1616,9 @@ select, input {
 
 .question {
   margin: 0 0 20px;
-  font-size: clamp(20px, 3vw, 30px);
+  height: 4.9em;
+  overflow: hidden;
+  font-size: clamp(19px, 2.6vw, 28px);
   font-weight: 800;
   line-height: 1.45;
 }
@@ -1623,6 +1627,7 @@ select, input {
   display: grid;
   grid-template-columns: 1fr auto auto;
   gap: 10px;
+  margin-top: auto;
 }
 
 button {
@@ -1644,16 +1649,17 @@ button.ghost {
 }
 
 .feedback {
-  min-height: 86px;
+  height: 60px;
+  overflow: hidden;
   margin-top: 16px;
-  padding: 14px;
+  padding: 12px 14px;
   border-radius: 8px;
   background: #f8fafc;
   border: 1px solid var(--line);
 }
 
 .feedback:empty {
-  display: none;
+  visibility: hidden;
 }
 
 .feedback.good { border-color: rgba(20,122,76,.45); color: var(--good); }
@@ -1663,7 +1669,7 @@ button.ghost {
   display: grid;
   grid-template-columns: auto auto 1fr;
   gap: 10px;
-  margin-top: 18px;
+  margin-top: 12px;
 }
 
 .card-actions #nextBtn { justify-self: end; min-width: 120px; }
@@ -2004,14 +2010,21 @@ dd { margin: 0; font-weight: 800; }
 
 @media (max-width: 980px) {
   .layout { grid-template-columns: 1fr; }
-  .progress { order: -1; }
+  .study { order: -2; }
+  .filters { order: 1; }
+  .progress { order: 2; }
   .learn-grid { grid-template-columns: 1fr; }
   .lesson-path { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 620px) {
-  .topbar { align-items: flex-start; gap: 14px; }
-  .answer-row { grid-template-columns: 1fr; }
+  .topbar {
+    min-height: auto;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+  }
+  .answer-row { grid-template-columns: minmax(0, 1fr) auto auto; }
   .card-actions { grid-template-columns: 1fr 1fr; }
   .card-actions #nextBtn { grid-column: 1 / -1; width: 100%; }
   .flow { grid-template-columns: 1fr; }

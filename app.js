@@ -78,8 +78,85 @@ function visualKey(card) {
   return "mechanism";
 }
 
+function cleanForCard(value, answer) {
+  let text = String(value || "")
+    .replaceAll("この用語", answer)
+    .replace(/\s+/g, " ")
+    .trim();
+  for (const prefix of [`${answer}とは`, `${answer}は`]) {
+    if (text.startsWith(prefix)) {
+      text = text.slice(prefix.length).replace(/^[，、]/, "").trim();
+      break;
+    }
+  }
+  for (const open of ["(", "（"]) {
+    const close = open === "(" ? ")" : "）";
+    const prefix = answer + open;
+    if (!text.startsWith(prefix)) continue;
+    const end = text.indexOf(close, prefix.length);
+    const rest = end >= 0 ? text.slice(end + close.length) : "";
+    if (/^(とは|は)[，、]?/.test(rest)) {
+      text = rest.replace(/^(とは|は)[，、]?/, "").trim();
+      break;
+    }
+  }
+  return text
+    .replace(/です。.*$/, "です。")
+    .replace(/ます。.*$/, "ます。")
+    .trim();
+}
+
+function splitSentences(value) {
+  return String(value || "")
+    .replace(/([。．])(?=\S)/g, "$1\n")
+    .split(/\n/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function trimForQuestion(value) {
+  return String(value || "")
+    .replace("ソフトウェア制御によって物理的なネットワーク構成にとらわれない動的で柔軟なネットワークを実現する技術全般を意味します", "ソフトウェア制御でネットワークを動的・柔軟に実現する技術")
+    .replace(/技術全般を意味します$/, "技術")
+    .replace(/全般を意味します$/, "")
+    .replace(/を意味します$/, "")
+    .replace(/であること$/, "")
+    .replace(/すること$/, "する")
+    .trim();
+}
+
+function clipText(value, limit = 56) {
+  const text = trimForQuestion(value);
+  if (text.length <= limit) return text;
+  const cut = text.slice(0, limit);
+  const phrase = cut.replace(/[，、。．][^，、。．]*$/, "");
+  return (phrase.length >= 18 ? phrase : cut).replace(/[，、。．]+$/, "") + "。";
+}
+
+function conciseText(card) {
+  const answer = card.term;
+  const cue = cleanForCard(card.cue, answer).replaceAll(answer, "この用語");
+  const first = trimForQuestion(splitSentences(cue)[0] || cue);
+  if (first.length <= 58) return first;
+  const beforeComma = first.split(/[，、]/).slice(0, 2).join("、");
+  if (beforeComma.length >= 18 && beforeComma.length <= 54) return beforeComma + "。";
+  return clipText(first, 54);
+}
+
+function conciseMemory(card, text) {
+  const memoryText = clipText(text.replace(/。$/, ""), 30).replace(/。$/, "");
+  if (/IPアドレス.*MACアドレス/.test(text)) return "IPからMACを引く、と短く覚える。DNSやDHCPと混同しない。";
+  if (/失効|証明書/.test(text)) return "証明書が有効か、失効していないかを確認する文脈で思い出す。";
+  if (/隣り合う要素|交換/.test(text)) return "隣同士を比べて交換する、という動きだけを押さえる。";
+  if (/仮想|サーバ|クラウド|環境/.test(text)) return "どこを仮想化し、何を利用者に見せるかで見分ける。";
+  if (/攻撃|不正|脆弱|認証|暗号/.test(text)) return "守る対象、攻撃の入口、確認相手の3点で見分ける。";
+  if (/データ|DB|表|トランザクション/.test(text)) return "データの持ち方、整合性、検索の仕方に注目する。";
+  return memoryText;
+}
+
 const cards = sourceCards.map((card) => {
   const visual = visualKey(card);
+  const text = conciseText(card);
   const aliases = compactAliases([
     card.term,
     ...(card.aliases || []),
@@ -88,9 +165,9 @@ const cards = sourceCards.map((card) => {
   return {
     id: card.id,
     answer: card.term,
-    text: card.cue,
+    text,
     visual,
-    memory: card.explanation || card.cue,
+    memory: conciseMemory(card, text),
     aliases,
     exam: card.examLabel,
     examKey: card.exam,
@@ -1510,12 +1587,12 @@ function lessonFor(card) {
 }
 
 function sharpTitle(card, lesson = lessonFor(card)) {
-  const weakTitles = new Set(["本物か確認", "データの仕組み", "仕組みの働き", "流れの中心", "見分ける特徴", "攻撃と防御"]);
-  if (!curatedLessons[card.id] && weakTitles.has(lesson.cueTitle)) return easyText(card.memory);
+  if (!curatedLessons[card.id]) return shortClue(easyText(card.memory), 18);
   return lesson.cueTitle;
 }
 
 function cueBodyHtml(card, lesson = lessonFor(card)) {
+  if (!curatedLessons[card.id]) return "";
   const title = normalize(sharpTitle(card, lesson));
   const cue = normalize(lesson.cue);
   if (title && cue && title === cue) return "";
@@ -2537,7 +2614,7 @@ function diagram(card) {
 }
 
 function prompt(card) {
-  return `${easyText(card.text)} この説明に当てはまる用語を答えてください。`;
+  return `${easyText(card.text)} 用語は？`;
 }
 
 function renderQuiz() {
