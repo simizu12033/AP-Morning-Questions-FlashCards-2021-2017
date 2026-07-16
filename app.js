@@ -749,7 +749,7 @@ function renderRichText(value) {
 
 function glossaryNoteHtml(entry) {
   const full = entry.full ? `<p class="term-full">${esc(entry.full)}</p>` : "";
-  return `<span class="term-note" role="note"><strong>${esc(entry.title)}</strong>${full}<span>${esc(entry.body)}</span><button type="button" class="term-close">戻る</button></span>`;
+  return `<span class="term-note" role="note"><strong>${esc(entry.title)}</strong>${full}<span>${esc(entry.body)}</span></span>`;
 }
 
 function hideAnswerText(card, value) {
@@ -3014,6 +3014,7 @@ function renderStats() {
 }
 
 function render() {
+  document.querySelectorAll(".term-note").forEach((note) => note.remove());
   els.quizView.classList.toggle("hidden", mode !== "quiz");
   els.learnView.classList.toggle("hidden", mode !== "learn");
   els.listView.classList.toggle("hidden", mode !== "list");
@@ -3095,12 +3096,6 @@ function termNoteAnchor(termButton) {
 }
 
 document.addEventListener("click", (event) => {
-  const close = event.target.closest(".term-close");
-  if (close) {
-    close.closest(".term-note")?.remove();
-    return;
-  }
-
   const termButton = event.target.closest(".term-link");
   if (!termButton) return;
   const entry = glossaryById[termButton.dataset.term];

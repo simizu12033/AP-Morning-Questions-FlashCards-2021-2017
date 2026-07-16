@@ -1947,14 +1947,6 @@ button.ghost {
   font-weight: 900;
 }
 
-.term-close {
-  justify-self: start;
-  min-height: 32px;
-  padding: 5px 10px;
-  background: white;
-  color: var(--accent);
-}
-
 .list-view {
   padding: 10px;
   max-height: 680px;
