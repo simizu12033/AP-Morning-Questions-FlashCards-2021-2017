@@ -2958,7 +2958,7 @@ function renderQuiz() {
   els.cardExam.textContent = card.exam;
   els.cardQno.textContent = `問${card.qno}`;
   els.cardCategory.textContent = card.category;
-  els.diagram.innerHTML = `<div class="quiz-visual">${diagramV2(card, false)}</div>`;
+  els.diagram.innerHTML = memoryCue(card);
   els.questionText.innerHTML = renderRichText(prompt(card).replace(card.answer, "□□□"));
   els.answerInput.value = "";
   els.feedback.className = "feedback";
