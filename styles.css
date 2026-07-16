@@ -1925,7 +1925,8 @@ button.ghost {
 .term-note {
   display: grid;
   gap: 6px;
-  margin: 10px 0;
+  width: 100%;
+  margin: 10px 0 4px;
   padding: 12px;
   border: 1px solid #cad8e5;
   border-left: 4px solid var(--accent-2);
@@ -1933,6 +1934,7 @@ button.ghost {
   background: #f8fbff;
   color: #12202d;
   line-height: 1.65;
+  box-shadow: 0 8px 18px rgba(24, 32, 42, .06);
 }
 
 .term-note strong {

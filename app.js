@@ -3090,6 +3090,10 @@ $("resetBtn").addEventListener("click", () => {
 els.answerInput.addEventListener("keydown", (event) => {
   if (event.key === "Enter") checkAnswer();
 });
+function termNoteAnchor(termButton) {
+  return termButton.closest("p, dd, li, .question, .feedback, .first-glance, .primary-aid, .memory-story section, .contrast-box div") || termButton;
+}
+
 document.addEventListener("click", (event) => {
   const close = event.target.closest(".term-close");
   if (close) {
@@ -3102,7 +3106,9 @@ document.addEventListener("click", (event) => {
   const entry = glossaryById[termButton.dataset.term];
   if (!entry) return;
   document.querySelectorAll(".term-note").forEach((note) => note.remove());
-  termButton.insertAdjacentHTML("afterend", glossaryNoteHtml(entry));
+  const anchor = termNoteAnchor(termButton);
+  anchor.insertAdjacentHTML("afterend", glossaryNoteHtml(entry));
+  anchor.nextElementSibling?.scrollIntoView({ block: "nearest", inline: "nearest" });
 });
 els.cardList.addEventListener("click", (event) => {
   const button = event.target.closest("[data-jump]");
