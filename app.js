@@ -133,6 +133,117 @@ function clipText(value, limit = 56) {
   return (phrase.length >= 18 ? phrase : cut).replace(/[，、。．]+$/, "") + "。";
 }
 
+const manualExpansions = {
+  "Git": ["分散型バージョン管理ツール"],
+  "ACID": ["Atomicity Consistency Isolation Durability"],
+  "トランザクションのACID特性": ["Atomicity Consistency Isolation Durability"],
+  "CSMA/CD方式": ["Carrier Sense Multiple Access with Collision Detection"],
+  "CSMA/CD": ["Carrier Sense Multiple Access with Collision Detection"],
+  "JPCERTコーディネーションセンター": ["Japan Computer Emergency Response Team Coordination Center"],
+  "RACIチャート": ["Responsible Accountable Consulted Informed"],
+  "SECIモデル": ["Socialization Externalization Combination Internalization"],
+  "UTF-8": ["Unicode Transformation Format 8-bit"],
+  "LPWA": ["Low Power Wide Area"],
+  "SSID": ["Service Set Identifier"],
+  "SIEM": ["Security Information and Event Management"],
+  "SSH": ["Secure Shell"],
+  "CMMI": ["Capability Maturity Model Integration"]
+};
+const termOrigins = {
+  "Git": "Gitは分散型バージョン管理ツール。リポジトリは履歴付きの保管場所で、中央リポジトリは共有元、ローカルリポジトリは各自の手元コピー。",
+  "RFID": "RFID = Radio Frequency Identification。Radio Frequencyは電波、Identificationは識別。RFタグやICタグのIDを電波で読み取る。",
+  "ACID": "ACID = Atomicity、Consistency、Isolation、Durability。原子性、一貫性、独立性、永続性の4性質。",
+  "トランザクションのACID特性": "ACID = Atomicity、Consistency、Isolation、Durability。原子性、一貫性、独立性、永続性の4性質。",
+  "リスクベース認証": "risk-based = 危険度に基づく。普段と違う場所や端末なら追加確認する認証方式。",
+  "レインボー攻撃": "rainbow tableは事前計算した対応表。パスワード候補とハッシュ値の表で照合を速くする攻撃。",
+  "バーンダウンチャート": "burn down = 燃え尽きて減る。残作業量が時間とともに下がる線を読む。",
+  "フェーズ・ゲート": "phaseは段階、gateは門。各段階の出口で、次へ進むかを判定する。",
+  "ウォッチドッグタイマー": "watchdogは番犬。一定時間応答がないと、番犬のように異常を検知して再起動などを促す。",
+  "ファウンドリーサービス": "foundryは鋳造所。ITでは半導体チップを設計会社の代わりに製造する会社・サービス。",
+  "キャズム理論": "chasmは深い溝。初期採用者と一般市場の間にある普及の壁を指す。",
+  "アグリゲーションサービス": "aggregationは集約。複数の情報や口座を一か所にまとめて見せるサービス。",
+  "アカウントアグリゲーション": "account aggregation = 口座やアカウントの集約。複数金融機関の情報をまとめて表示する。",
+  "データレイク": "lakeは湖。整形前の生データを、湖のように広くためて後で使う考え方。",
+  "サンドボックス": "sandboxは砂場。外へ影響しにくい隔離環境で、安全に実行して調べる。",
+  "ハイパーバイザ": "hypervisorは仮想マシンの監督役。物理マシン上で複数OSを動かす土台。",
+  "スタブ": "stubは切り株・短い代用品。未完成の下位モジュールの代わりに置く仮部品。"
+};
+const relatedRules = [
+  { terms: ["Git"], text: "関連語: リポジトリ=履歴付き保管場所、コミット=変更記録、ブランチ=作業の分岐。" },
+  { terms: ["RFID"], text: "関連語: RFタグ/ICタグ=IDを持つタグ、リーダライタ=タグを読む装置、パッシブ方式=電池なしで読取機の電波から動く方式。" },
+  { terms: ["ARP"], text: "関連語: IPアドレス=ネットワーク上の住所、MACアドレス=LAN機器の識別番号、RARPは逆向き。" },
+  { terms: ["RARP"], text: "関連語: ARPはIPからMAC、RARPはMACからIP。Reverseが逆向きの合図。" },
+  { terms: ["NAPT"], text: "関連語: NAT=IPアドレス変換、ポート番号=同じIP内の通信口、IPマスカレードはNAPTの別名。" },
+  { terms: ["CVSS"], text: "関連語: 脆弱性=弱点、スコア=点数化、深刻度=対応優先度の目安。" },
+  { terms: ["IPsec"], text: "関連語: IP層=ネットワーク層、暗号化=盗聴対策、認証=相手確認、改ざん検知=内容変更の検出。" },
+  { terms: ["RFI"], text: "関連語: RFPは提案依頼、RFQは見積依頼。RFIはInformationなので情報収集が目的。" },
+  { terms: ["VDI"], text: "関連語: 仮想デスクトップ=サーバ上のPC画面、シンクライアント=手元端末を軽くする構成。" },
+  { terms: ["CRUDマトリクス"], text: "関連語: Create=生成、Read=参照、Update=更新、Delete=削除。機能とデータの関係表。" },
+  { terms: ["ACID", "トランザクションのACID特性"], text: "関連語: 原子性=全部実行か全部取消、一貫性=整合性維持、独立性=同時実行で乱れない、永続性=確定後は残る。" },
+  { terms: ["NoSQL"], text: "関連語: RDBは表形式、KVSはキーと値、ドキュメント指向はJSON風、グラフ指向は点と線。" },
+  { terms: ["WAF"], text: "関連語: FWは通信の入口を見る、WAFはWebアプリの中身に近いHTTPデータを見る。" },
+  { terms: ["DNSSEC", "DNSキャッシュポイズニング", "DNSキャッシュポイズニング攻撃"], text: "関連語: DNS=名前解決、キャッシュ=一時保存、署名=応答が本物か確かめる印。" },
+  { terms: ["BCP"], text: "関連語: 事業継続=止めない、復旧=戻す、RTO=復旧目標時間、RPO=復旧時点目標。" },
+  { terms: ["RPA"], text: "関連語: 定型作業=手順が決まった作業、ロボット=画面操作を代行するソフト。" },
+  { terms: ["CRM"], text: "関連語: 顧客関係=購入履歴や問合せを管理し、販売やサポートに生かす。" },
+  { terms: ["SCM"], text: "関連語: supply chain=調達から販売までの供給の流れ。在庫・物流・販売をつなぐ。" },
+  { terms: ["UML", "SysML"], text: "関連語: モデリング=複雑な構造や振る舞いを図で表すこと。UMLはソフトウェア、SysMLはシステム寄り。" }
+];
+function cleanExpansion(value) { return String(value || "").replace(/[：:].*ジェイソン/, "").replace(/[：:][ 　]*$/, "").replace(/，/g, "、").replace(/[ 　]+/g, " ").trim(); }
+function escapeRegExp(value) {
+  const specials = ".^$|?*+()[]{}-" + String.fromCharCode(92);
+  const slash = String.fromCharCode(92);
+  return String(value || "").split("").map((ch) => specials.includes(ch) ? slash + ch : ch).join("");
+}
+function extractExpansions(card) {
+  const found = [];
+  const push = (value) => {
+    const cleaned = cleanExpansion(value);
+    if (cleaned && cleaned.length >= 3 && !found.some((item) => normalizeAlias(item) === normalizeAlias(cleaned))) found.push(cleaned);
+  };
+  for (const item of manualExpansions[card.term] || []) push(item);
+  const term = String(card.term || "").replace(/方式$/, "");
+  const source = [card.explanation, card.correctText, card.question, card.topic].join(" ");
+  const escaped = escapeRegExp(term);
+  const pairRe = new RegExp(escaped + "[（(]([^）)]{3,120})[）)]", "g");
+  for (const match of source.matchAll(pairRe)) push(match[1]);
+  const abbrRe = new RegExp(escaped + "(?:方式)?は[、，]?[ 　]*([A-Z][A-Za-z0-9 /+.-]{5,120})の略", "g");
+  for (const match of source.matchAll(abbrRe)) push(match[1]);
+  return found.slice(0, 3);
+}
+function originFor(card, expansion) {
+  if (termOrigins[card.answer]) return appendRelated(card, termOrigins[card.answer]);
+  if (originHints[card.id] || originHints[card.answer]) return appendRelated(card, originHints[card.id] || originHints[card.answer]);
+  const expanded = expansion || (card.expansions || [])[0] || "";
+  if (expanded) return appendRelated(card, card.answer + " = " + expanded + "。英語の語を日本語の働きに分解して覚える。");
+  if (originHints[card.visual]) return appendRelated(card, originHints[card.visual]);
+  return appendRelated(card, genericOrigin(card));
+}
+function appendRelated(card, origin) { const related = relatedFor(card); return related ? origin + " " + related : origin; }
+function relatedFor(card) {
+  const hit = relatedRules.find((rule) => rule.terms.includes(card.answer)); if (hit) return hit.text;
+  const text = card.answer + " " + card.topic + " " + card.category;
+  if (/プロトコル|通信|ネットワーク|LAN|IP|MAC|DNS/.test(text)) return "関連語: プロトコル=通信の約束、アドレス=相手を識別する番号。";
+  if (/データベース|SQL|トランザクション|DB/.test(text)) return "関連語: 表=行と列、キー=データを識別する値、整合性=データのつじつま。";
+  if (/認証|暗号|証明|攻撃|脆弱|セキュリティ/.test(text)) return "関連語: 認証=本人確認、暗号化=読めなくする、脆弱性=攻撃される弱点。";
+  if (/プロジェクト|サービス|管理|監査|運用/.test(text)) return "関連語: 管理=状態を見て調整すること、評価=基準に照らして確認すること。";
+  if (/経営|マーケティング|会計|契約|調達|顧客/.test(text)) return "関連語: 戦略=目的達成の方針、指標=状態を数値で見るもの。";
+  return "";
+}
+function genericOrigin(card) {
+  const term = card.answer;
+  if (/方式$/.test(term)) return "方式はmethodの意味。処理のやり方・手順を答えるカード。";
+  if (/法$/.test(term)) return "法はmethodの意味。手順や考え方の型として覚える。";
+  if (/図|チャート|ダイアグラム/.test(term)) return "図・チャート・ダイアグラムは、関係や流れを目で表す道具。";
+  if (/管理/.test(term)) return "管理はmanagement。状態を集め、基準に合わせて調整する働き。";
+  if (/分析/.test(term)) return "分析はanalysis。対象を分けて、傾向や原因を見つける働き。";
+  if (/モデル/.test(term)) return "モデルはmodel。複雑なものを理解しやすい形に単純化したもの。";
+  if (/サービス/.test(term)) return "サービスはservice。利用者や他組織に提供する働きとして覚える。";
+  if (/攻撃/.test(term)) return "攻撃はattack。どこから入り、何を悪用するかで見分ける。";
+  if (/認証/.test(term)) return "認証はauthentication。相手が本人かどうかを確かめる働き。";
+  return term + "は『" + easyText(card.memory) + "』を指す名前。語の部品と問題文の働きを結び付けて覚える。";
+}
+
 const mnemonicHints = {
   "バブルソート": "隣同士を比べて交換",
   "コンテナ型仮想化": "アプリ一式を箱に入れる",
@@ -354,10 +465,13 @@ function conciseMemory(card, text) {
 const cards = sourceCards.map((card) => {
   const visual = visualKey(card);
   const text = conciseText(card);
+  const expansions = extractExpansions(card);
   const aliases = compactAliases([
     card.term,
     ...(card.aliases || []),
+    ...expansions,
     initials(card.term),
+    ...expansions.map(initials),
   ]);
   return {
     id: card.id,
@@ -366,6 +480,7 @@ const cards = sourceCards.map((card) => {
     visual,
     memory: conciseMemory(card, text),
     aliases,
+    expansions,
     exam: card.examLabel,
     examKey: card.exam,
     url: card.sourceUrl,
@@ -603,6 +718,11 @@ const glossaryEntries = [
   { id: "wbs", terms: ["WBS"], title: "WBS", full: "Work Breakdown Structure", body: "プロジェクト作業を階層的に細かく分けた構成図です。" },
   { id: "uml", terms: ["UML"], title: "UML", full: "Unified Modeling Language", body: "ソフトウェアや業務の構造・動きを図で表すための共通記法です。" },
   { id: "ux", terms: ["UX"], title: "UX", full: "User Experience", body: "利用者が製品やサービスを使う前後を含めて得る体験全体です。" },
+  { id: "repository", terms: ["リポジトリ", "中央リポジトリ", "ローカルリポジトリ", "repository"], title: "リポジトリ", full: "repository", body: "ファイル本体だけでなく、変更履歴や枝分かれも含めて保管する場所です。Gitでは各自の手元にも完全なリポジトリを持てます。" },
+  { id: "commit", terms: ["コミット", "commit"], title: "コミット", full: "commit", body: "変更内容を履歴として確定して残す操作、またはその記録です。" },
+  { id: "branch", terms: ["ブランチ", "branch"], title: "ブランチ", full: "branch", body: "作業の流れを枝分かれさせる仕組みです。別作業を並行して進めるときに使います。" },
+  { id: "rf-tag", terms: ["RFタグ", "ICタグ", "リーダライタ", "パッシブ方式"], title: "RFタグ / ICタグ", full: "Radio Frequency tag", body: "ID情報を持つ小さなタグです。パッシブ方式は電池を持たず、読取機から受けた電波で動きます。" },
+  { id: "version-control", terms: ["バージョン管理", "分散型", "集中型"], title: "バージョン管理", full: "version control", body: "ファイルの変更履歴を記録して戻したり比較したりする仕組みです。分散型は各自が履歴を持ち、集中型は中央を主に使います。" },
 ];
 
 const glossaryById = Object.fromEntries(glossaryEntries.map((entry) => [entry.id, entry]));
@@ -1760,9 +1880,7 @@ const contrastHints = {
 function buildLesson(card) {
   const expansion = primaryExpansion(card);
   const family = visualFamily(card.visual);
-  const origin = originHints[card.id] || originHints[card.answer] || originHints[card.visual] || (expansion
-    ? `${card.answer} = ${expansion}。正式名称の語を意味と結び付けて覚える。`
-    : `${card.answer}は「${easyText(card.memory)}」を指す名前。語源より、問題文の働きと結び付けて覚える。`);
+  const origin = originFor(card, expansion);
   const analogy = analogyHints[card.id] || analogyHints[card.answer] || analogyHints[card.visual] || analogyHints[family] || analogyHints.mechanism;
   const choices = choiceHints[card.id] || choiceHints[card.answer] || choiceHints[card.visual] || choiceHints[family] || choiceHints.mechanism;
   return {
@@ -1921,6 +2039,14 @@ function memoryStoryHtml(card) {
     </section>
     ${contrastHtml(card)}
   </div>`;
+}
+
+function originMiniHtml(card) {
+  const lesson = lessonFor(card);
+  return `<section class="contrast-box compact origin-mini">
+    <span>語源・関連語</span>
+    <p>${renderRichText(lesson.origin)}</p>
+  </section>`;
 }
 
 function fillSelect(select, values, allLabel) {
@@ -2832,7 +2958,7 @@ function renderQuiz() {
   els.cardExam.textContent = card.exam;
   els.cardQno.textContent = `問${card.qno}`;
   els.cardCategory.textContent = card.category;
-  els.diagram.innerHTML = memoryCue(card);
+  els.diagram.innerHTML = `<div class="quiz-visual">${diagramV2(card, false)}</div>`;
   els.questionText.innerHTML = renderRichText(prompt(card).replace(card.answer, "□□□"));
   els.answerInput.value = "";
   els.feedback.className = "feedback";
@@ -2907,15 +3033,15 @@ function checkAnswer() {
   progress[card.id] = { ...progress[card.id], right: accepted || progress[card.id]?.right, attempts: (progress[card.id]?.attempts || 0) + 1 };
   els.feedback.className = `feedback ${accepted ? "good" : "bad"}`;
   els.feedback.innerHTML = accepted
-    ? `正解。答えは <strong>${esc(card.answer)}</strong> です。`
-    : `答えは <strong>${esc(card.answer)}</strong>。${esc(easyText(card.memory))} と覚えると選択肢を切れます。${mistakeHintHtml(card, els.answerInput.value)}`;
+    ? `正解。答えは <strong>${esc(card.answer)}</strong> です。${originMiniHtml(card)}`
+    : `答えは <strong>${esc(card.answer)}</strong>。${esc(easyText(card.memory))} と覚えると選択肢を切れます。${mistakeHintHtml(card, els.answerInput.value)}${originMiniHtml(card)}`;
   saveProgress();
 }
 
 function revealAnswer() {
   const card = currentCard();
   els.feedback.className = "feedback";
-  els.feedback.innerHTML = `答えは <strong>${esc(card.answer)}</strong>。${renderRichText(card.text)}${contrastHtml(card, true)}`;
+  els.feedback.innerHTML = `答えは <strong>${esc(card.answer)}</strong>。${renderRichText(card.text)}${contrastHtml(card, true)}${originMiniHtml(card)}`;
 }
 
 function move(delta) {
