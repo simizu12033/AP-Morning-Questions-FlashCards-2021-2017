@@ -1649,13 +1649,17 @@ button.ghost {
 }
 
 .feedback {
-  height: 60px;
-  overflow: hidden;
+  min-height: 60px;
+  height: auto;
+  overflow: visible;
+  display: grid;
+  gap: 10px;
   margin-top: 16px;
   padding: 12px 14px;
   border-radius: 8px;
   background: #f8fafc;
   border: 1px solid var(--line);
+  line-height: 1.7;
 }
 
 .feedback:empty {

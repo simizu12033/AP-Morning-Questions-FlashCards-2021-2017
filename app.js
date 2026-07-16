@@ -2985,7 +2985,7 @@ function renderLearn() {
         <p><strong>出題の手掛かり:</strong> ${esc(card.topic)}</p>
         <p><a href="${card.url}" target="_blank" rel="noreferrer">元問題を開く</a></p>
       </div>
-      <div class="diagram">${primaryAidHtml(card)}</div>
+      <div class="diagram">${diagramV2(card, true)}</div>
     </div>`;
 }
 
